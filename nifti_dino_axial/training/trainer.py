@@ -276,8 +276,7 @@ class DINOv3Trainer:
                     n_bad = _bad.sum().item()
                     logger.warning(
                         f"[rank {self.rank}] {_mname}.{_pname}: "
-                        f"{n_bad} NaN/Inf values after init "
-                        f"(torch.empty not in checkpoint) — zeroing"
+                        f"{n_bad} NaN/Inf values after init — zeroing"
                     )
                     _p.data[_bad] = 0.0
                 _large = _p.data.abs() > _SAFE_MAX
@@ -285,8 +284,7 @@ class DINOv3Trainer:
                     n_large = _large.sum().item()
                     logger.warning(
                         f"[rank {self.rank}] {_mname}.{_pname}: "
-                        f"{n_large} very-large values (|x|>{_SAFE_MAX}) "
-                        f"(torch.empty garbage) — zeroing"
+                        f"{n_large} very-large values (|x|>{_SAFE_MAX}) — zeroing"
                     )
                     _p.data[_large] = 0.0
 
@@ -363,15 +361,12 @@ class DINOv3Trainer:
         # Keep only the last N full checkpoints (each ~3 GB) to avoid filling $WORK.
         # Model-only checkpoints (BF16 teacher backbone, ~300 MB each) are kept all.
         self.keep_checkpoints  = cfg["training"].get("keep_checkpoints",     3)
-        self.grad_clip      = cfg["optim"].get("grad_clip",       3.0)
-        self.koleo_weight   = loss_cfg.get("koleo_weight",        0.1)
-        self.ibot_weight    = loss_cfg.get("ibot_weight",         1.0)
-        self.gram_weight    = loss_cfg.get("gram_weight",         0.0)
-        self.step           = 0
+        self.grad_clip         = cfg["optim"].get("grad_clip",             3.0)
+        self.koleo_weight      = loss_cfg.get("koleo_weight",              0.1)
+        self.ibot_weight       = loss_cfg.get("ibot_weight",               1.0)
+        self.gram_weight       = loss_cfg.get("gram_weight",               0.0)
+        self.step              = 0
 
-        # Flexi patch sizes: sample one per training step.
-        # The dataset generates masks at base_patch_size; _adapt_masks() downsizes
-        # them on-the-fly when a larger patch size is sampled.
         self.base_patch_size = cfg["model"]["patch_size"]
         _ps_cfg = cfg.get("patch_sizes", None)
         self.patch_sizes: list[int] = sorted(_ps_cfg) if _ps_cfg else [self.base_patch_size]
@@ -445,6 +440,9 @@ class DINOv3Trainer:
         return out
 
     def _step(self, batch: dict) -> dict[str, torch.Tensor]:
+        import time
+        t0 = time.perf_counter()
+
         n_global   = batch["global_crops"].shape[0]
         n_regional = batch["regional_crops"].shape[0] if "regional_crops" in batch else 0
         n_local    = batch["local_crops"].shape[0]
@@ -518,20 +516,26 @@ class DINOv3Trainer:
             gram_l = gram_l / n_global
             total  = total + self.gram_weight * gram_l
 
+        torch.cuda.synchronize()
+        batch_size = batch["global_crops"].shape[1]
+        n_crops    = n_global + n_regional + n_local
+        throughput = batch_size * n_crops * self.world_size / (time.perf_counter() - t0)
+
         return {
             "loss":       total,
             "dino_loss":  dino_l.detach(),
             "ibot_loss":  ibot_l.detach(),
             "koleo_loss": koleo_l.detach(),
             "gram_loss":  gram_l.detach(),
-            "patch_size": step_ps,          # logged; not a tensor
+            "patch_size": step_ps,
+            "throughput": throughput,
         }
 
     # ------------------------------------------------------------------
     # Training loop
     # ------------------------------------------------------------------
 
-    def train(self, dataloader: DataLoader) -> None:
+    def train(self, dataloader: DataLoader, profiler=None) -> None:
         cfg       = self.cfg
         base_lr   = cfg["optim"]["base_lr"]
         wd_start  = cfg["optim"].get("wd_start",  0.04)
@@ -582,6 +586,9 @@ class DINOv3Trainer:
 
             self.step += 1
 
+            if profiler is not None:
+                profiler.step()
+
             if self.is_main and self.step % self.log_every == 0:
                 _t_now       = time.time()
                 _elapsed     = _t_now - _t_last
@@ -604,6 +611,7 @@ class DINOv3Trainer:
                     f"  ps={loss_dict['patch_size']}"
                     f"  lr={lr:.2e}  ema={ema:.5f}"
                     f"  it/s={_it_s:.2f}"
+                    f"  tput={loss_dict['throughput']:.0f}img/s"
                     f"  eta={_eta_h}h{_eta_m:02d}m"
                 )
                 # ── JSONL + TensorBoard ────────────────────────────────────

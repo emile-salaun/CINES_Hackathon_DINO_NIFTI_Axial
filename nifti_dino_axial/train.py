@@ -10,6 +10,12 @@ Single-GPU debug:
     python nifti_dino_axial/train.py \
         --config nifti_dino_axial/configs/phase1.yaml \
         --output_dir /checkpoints/axial_p1_debug
+
+Profiling (rank 0 only, 13 steps then stops):
+    python -m torch.distributed.run --nproc_per_node=8 nifti_dino_axial/train.py \
+        --config nifti_dino_axial/configs/phase1.yaml \
+        --output_dir /checkpoints/axial_p1 \
+        --profile
 """
 from __future__ import annotations
 
@@ -23,6 +29,7 @@ import torch
 import torch.distributed as dist
 import yaml
 from torch.utils.data import DataLoader, DistributedSampler
+from torch.profiler import profile, ProfilerActivity
 
 _ROOT = Path(__file__).parents[1]  # parent of the package dir (e.g. $WORK)
 sys.path.insert(0, str(_ROOT))
@@ -145,6 +152,12 @@ def main() -> None:
                         help="Limit number of NIfTI volumes (useful for quick smoke tests)")
     parser.add_argument("--nifti_dir",   default=None,
                         help="Override data.nifti_dir from config (e.g. $SCRATCH/ct_nifti)")
+    # [profiler] flag — activates torch profiler for a short window then stops.
+    # Only rank 0 writes traces; other ranks run normally without profiler overhead.
+    parser.add_argument("--profile",      action="store_true",
+                        help="Run torch profiler (wait=5, warmup=5, active=3) on rank 0")
+    parser.add_argument("--profile_with_stack", action="store_true",
+                        help="Include Python call stack in profiler trace (higher overhead)")
     args = parser.parse_args()
 
     with open(args.config) as f:
@@ -279,7 +292,29 @@ def main() -> None:
         resume_path      = args.resume,
     )
 
-    trainer.train(dataloader)
+    # ---- Profiler setup ----
+    # Active uniquement sur rank 0 pour éviter l'overhead sur tous les GPUs.
+    # Schedule : 5 steps ignorés (JIT/compile chauffe) + 5 warmup + 3 actifs = 13 steps.
+    # Les traces sont écrites dans output_dir/profiler/ au format TensorBoard.
+    if args.profile and is_main:
+        profile_dir = str(Path(args.output_dir) / "profiler")
+        prof = profile(
+            activities      = [ProfilerActivity.CPU, ProfilerActivity.CUDA],
+            schedule        = torch.profiler.schedule(wait=5, warmup=5, active=3),
+            on_trace_ready  = torch.profiler.tensorboard_trace_handler(profile_dir),
+            record_shapes   = True,
+            with_stack      = args.profile_with_stack,
+        )
+        prof.start()
+        logger.info(f"Profiler started — traces → {profile_dir}")
+    else:
+        prof = None
+
+    trainer.train(dataloader, profiler=prof)
+
+    if prof is not None:
+        prof.stop()
+        logger.info("Profiler stopped.")
 
     if dist.is_initialized():
         dist.destroy_process_group()
