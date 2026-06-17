@@ -1,0 +1,32 @@
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+
+# venvs
+venv*/
+.venv/
+
+# checkpoints & data
+*.pt
+*.pth
+*.ckpt
+*.nii
+*.nii.gz
+slice_index*.json
+
+# outputs
+logs/
+*.log
+wandb/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
