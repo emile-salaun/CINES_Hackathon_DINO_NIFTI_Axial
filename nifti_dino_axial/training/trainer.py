@@ -440,9 +440,6 @@ class DINOv3Trainer:
         return out
 
     def _step(self, batch: dict) -> dict[str, torch.Tensor]:
-        import time
-        t0 = time.perf_counter()
-
         n_global   = batch["global_crops"].shape[0]
         n_regional = batch["regional_crops"].shape[0] if "regional_crops" in batch else 0
         n_local    = batch["local_crops"].shape[0]
@@ -516,19 +513,13 @@ class DINOv3Trainer:
             gram_l = gram_l / n_global
             total  = total + self.gram_weight * gram_l
 
-        torch.cuda.synchronize()
-        batch_size = batch["global_crops"].shape[1]
-        n_crops    = n_global + n_regional + n_local
-        throughput = batch_size * n_crops * self.world_size / (time.perf_counter() - t0)
-
         return {
             "loss":       total,
             "dino_loss":  dino_l.detach(),
             "ibot_loss":  ibot_l.detach(),
             "koleo_loss": koleo_l.detach(),
             "gram_loss":  gram_l.detach(),
-            "patch_size": step_ps,
-            "throughput": throughput,
+            "patch_size": step_ps,          # logged; not a tensor
         }
 
     # ------------------------------------------------------------------
@@ -611,7 +602,6 @@ class DINOv3Trainer:
                     f"  ps={loss_dict['patch_size']}"
                     f"  lr={lr:.2e}  ema={ema:.5f}"
                     f"  it/s={_it_s:.2f}"
-                    f"  tput={loss_dict['throughput']:.0f}img/s"
                     f"  eta={_eta_h}h{_eta_m:02d}m"
                 )
                 # ── JSONL + TensorBoard ────────────────────────────────────
