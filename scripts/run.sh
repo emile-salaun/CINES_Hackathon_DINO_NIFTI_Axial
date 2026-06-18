@@ -37,9 +37,10 @@ srun --ntasks-per-node=1 --gpus-per-task="${GPUS_PER_NODE}" \
         -- "$DIR/train.py" \
             --config "$DIR/configs/phase1.yaml" \
             --pretrained "$DIR/models_pretrained/flexiCT/2D_final_model.pth" \
+            --nifti_dir /lus/work/CT3/cad17796/SHARED/merlinabdominalctdataset/merlin_data \
             --output_dir "$DIR/checkpoints-mi300" \
-            --max_volumes 100 \
-            --profile
+            --max_volumes 100 
+            # --profile
             
 
 echo "Job ended at $(date -R)"
