@@ -16,12 +16,13 @@ export LD_PRELOAD=/lus/work/CT3/cad17796/SHARED/spack-install-hipblaslt-patch/li
 export MIOPEN_USER_DB_PATH="/tmp/${USER}-miopen-cache-${SLURM_JOB_ID}"
 export MIOPEN_CUSTOM_CACHE_DIR="${MIOPEN_USER_DB_PATH}"
 
-export NCCL_SOCKET_IFNAME=hsn0,hsn1,hsn2,hsn3
+export NCCL_SOCKET_IFNAME=hsn0
+export NCCL_IB_DISABLE=1              
+export NCCL_CROSS_NIC=1                
+export FI_CXI_ATS=0                    
 
-export OMP_NUM_THREADS="${CPUS_PER_TASK:-32}"
-export HSA_FORCE_FINE_GRAIN_PCIE=1 
-export HSA_XNACK=1
-
+export PYTORCH_HIP_ALLOC_CONF="expandable_segments:True"
+export OMP_NUM_THREADS=4 
 
 echo ""
 echo "================================================================"
@@ -53,10 +54,7 @@ srun --ntasks-per-node=1 --gpus-per-task="${GPUS_PER_NODE}" \
         -- "$DIR/train.py" \
             --config "$DIR/configs/phase1.yaml" \
             --pretrained "$DIR/models_pretrained/flexiCT/2D_final_model.pth" \
-            --nifti_dir /lus/work/CT3/cad17796/SHARED/merlinabdominalctdataset/merlin_data \
-            --output_dir "$DIR/$JOB_ID" \
-            --max_volumes 100 
-            # --profile
+            --output_dir "$DIR/checkpoints-$SLURM_JOB_ID"
             
 
 echo "Job ended at $(date -R)"
