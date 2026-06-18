@@ -48,7 +48,7 @@ for _p in _FLEXICT_CANDIDATES:
 from flexi_ct.models import flexi_ct_backbone_base  # type: ignore
 
 from nifti_dino_axial.data.dataset import (
-    NiftiAxialDataset,
+    NpyAxialDataset,
     axial_dinov_collate,
 )
 from nifti_dino_axial.masking import AnatomicallyGuidedMasker
@@ -216,34 +216,33 @@ def main() -> None:
     # Build only on rank 0 (scans NIfTI files + writes index_json), then
     # barrier so other ranks load the already-saved index — avoids a
     # multi-process write race on the JSON file.
-    data_cfg       = cfg["data"]
-    index_json     = data_cfg.get("index_json", None)
+    data_cfg = cfg["data"]
+    index_json = "/lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json"
 
-    def _build_dataset() -> "NiftiAxialDataset":
-        return NiftiAxialDataset(
-            nifti_dir     = data_cfg["nifti_dir"],
-            transform     = transform,
-            masker        = masker,
-            patch_size    = cfg["model"].get("patch_size", 8),
-            hu_clip       = (
-                data_cfg.get("hu_clip_min", -1000.0),
-                data_cfg.get("hu_clip_max",  1000.0),
-            ),
-            min_body_frac = data_cfg.get("min_body_frac", 0.05),
-            bg_threshold  = data_cfg.get("bg_threshold",  -800.0),
-            index_json    = index_json,
-            cache_size    = data_cfg.get("cache_size",     4),
-            max_volumes   = args.max_volumes,
+    if not Path(index_json).exists():
+        raise FileNotFoundError(
+            f"Slice index not found: {index_json}\n"
+            "Run preprocess_nifti_to_npy.py before launching training."
         )
 
-    if dist.is_initialized() and index_json and not Path(index_json).exists():
-        if is_main:
-            dataset = _build_dataset()   # rank 0 scans + writes the JSON
-        dist.barrier()                   # all others wait
-        if not is_main:
-            dataset = _build_dataset()   # now the JSON exists → fast load
-    else:
-        dataset = _build_dataset()
+    dataset = NpyAxialDataset(
+            index_json    = index_json,
+            transform     = transform,
+            masker        = masker,
+            patch_size    = cfg["model"].get("patch_size",   8),
+            bg_threshold  = data_cfg.get("bg_threshold",    -800.0),
+            min_body_frac = data_cfg.get("min_body_frac",   0.05),
+            cache_size    = data_cfg.get("cache_size",       8),
+        )
+
+    # if dist.is_initialized() and index_json and not Path(index_json).exists():
+    #     if is_main:
+    #         dataset = _build_dataset()   # rank 0 scans + writes the JSON
+    #     dist.barrier()                   # all others wait
+    #     if not is_main:
+    #         dataset = _build_dataset()   # now the JSON exists → fast load
+    # else:
+    #     dataset = _build_dataset()
 
     if is_main:
         logger.info(f"Dataset: {len(dataset):,} valid axial slices")
