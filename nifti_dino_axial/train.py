@@ -10,12 +10,6 @@ Single-GPU debug:
     python nifti_dino_axial/train.py \
         --config nifti_dino_axial/configs/phase1.yaml \
         --output_dir /checkpoints/axial_p1_debug
-
-Profiling (rank 0 only, 13 steps then stops):
-    python -m torch.distributed.run --nproc_per_node=8 nifti_dino_axial/train.py \
-        --config nifti_dino_axial/configs/phase1.yaml \
-        --output_dir /checkpoints/axial_p1 \
-        --profile
 """
 from __future__ import annotations
 
@@ -29,7 +23,6 @@ import torch
 import torch.distributed as dist
 import yaml
 from torch.utils.data import DataLoader, DistributedSampler
-from torch.profiler import profile, ProfilerActivity
 
 _ROOT = Path(__file__).parents[1]  # parent of the package dir (e.g. $WORK)
 sys.path.insert(0, str(_ROOT))
@@ -141,39 +134,18 @@ def load_pretrained_weights(backbone: torch.nn.Module, ckpt_path: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="DINOv3 Phase 1 pre-training on axial NIfTI CT slices"
+        description="DINOv3 Phase 1 pre-training on axial CT slices"
     )
-    parser.add_argument("--config",       required=True)
-    parser.add_argument("--output_dir",   required=True)
-    parser.add_argument("--resume",       default=None, help="Checkpoint to resume from")
-    parser.add_argument("--pretrained",   default=None,
+    parser.add_argument("--config",     required=True)
+    parser.add_argument("--output_dir", required=True)
+    parser.add_argument("--resume",     default=None, help="Checkpoint to resume from")
+    parser.add_argument("--pretrained", default=None,
                         help="DINOv3 / FlexiCT ImageNet pretrained weights to initialise from")
-    parser.add_argument("--max_volumes",  default=None, type=int,
-                        help="Limit number of NIfTI volumes (useful for quick smoke tests)")
-    parser.add_argument("--nifti_dir",   default=None,
-                        help="Override data.nifti_dir from config (e.g. $SCRATCH/ct_nifti)")
-    # [profiler] flag — activates torch profiler for a short window then stops.
-    # Only rank 0 writes traces; other ranks run normally without profiler overhead.
-    parser.add_argument("--profile",      action="store_true",
-                        help="Run torch profiler (wait=5, warmup=5, active=3) on rank 0")
-    parser.add_argument("--profile_with_stack", action="store_true",
-                        help="Include Python call stack in profiler trace (higher overhead)")
+    # --nifti_dir and --max_volumes removed: index is pre-built by preprocessing script
     args = parser.parse_args()
 
     with open(args.config) as f:
         cfg = yaml.safe_load(f)
-
-    # CLI overrides — must come right after config load so all downstream code
-    # (dataset build, trainer) sees the updated values.
-    if args.nifti_dir:
-        old_index = cfg["data"].get("index_json", None)
-        cfg["data"]["nifti_dir"] = args.nifti_dir
-        # Also relocate index_json into the new nifti_dir so we don't try to
-        # write to the config's placeholder path (e.g. /data/ct_nifti/).
-        if old_index:
-            cfg["data"]["index_json"] = str(
-                Path(args.nifti_dir) / Path(old_index).name
-            )
 
     # ---- Distributed init ----
     if "RANK" in os.environ:
@@ -191,33 +163,32 @@ def main() -> None:
         logger.info(f"Output dir : {args.output_dir}")
 
     # ---- Build transform + masker ----
-    tf_cfg     = cfg.get("transforms", {})
-    mask_cfg   = cfg.get("masking",    {})
+    tf_cfg   = cfg.get("transforms", {})
+    mask_cfg = cfg.get("masking",    {})
 
     transform = AxialDINOvTransform(
         n_global    = cfg["data"].get("n_global",         2),
-        n_regional  = cfg["data"].get("n_regional", 4),
+        n_regional  = cfg["data"].get("n_regional",       0),
         n_local     = cfg["data"].get("n_local",          8),
-        global_size = cfg["data"].get("global_crop_size", 512),
+        global_size = cfg["data"].get("global_crop_size", 256),
         hflip_prob  = tf_cfg.get("hflip_prob",  0.5),
         filter_prob = tf_cfg.get("filter_prob", 0.5),
     )
 
     masker = AnatomicallyGuidedMasker(
-        mask_ratio       = mask_cfg.get("mask_ratio",         0.40),
-        min_aspect       = mask_cfg.get("min_aspect",         0.3),
-        max_aspect       = mask_cfg.get("max_aspect",         3.3),
-        max_block_area   = mask_cfg.get("max_block_area",     0.35),
-        gaussian_sigma   = mask_cfg.get("gaussian_sigma",     None),
-        n_fallback_iters = mask_cfg.get("n_fallback_iters",   50),
+        mask_ratio       = mask_cfg.get("mask_ratio",       0.40),
+        min_aspect       = mask_cfg.get("min_aspect",       0.3),
+        max_aspect       = mask_cfg.get("max_aspect",       3.3),
+        max_block_area   = mask_cfg.get("max_block_area",   0.35),
+        gaussian_sigma   = mask_cfg.get("gaussian_sigma",   None),
+        n_fallback_iters = mask_cfg.get("n_fallback_iters", 50),
     )
 
     # ---- Dataset ----
-    # Build only on rank 0 (scans NIfTI files + writes index_json), then
-    # barrier so other ranks load the already-saved index — avoids a
-    # multi-process write race on the JSON file.
+    # Index is pre-built by preprocess_nifti_to_npy.py — all ranks load directly,
+    # no rank-0 barrier needed.
     data_cfg = cfg["data"]
-    index_json = "/lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json"
+    index_json = data_cfg["index_json"]
 
     if not Path(index_json).exists():
         raise FileNotFoundError(
@@ -226,23 +197,14 @@ def main() -> None:
         )
 
     dataset = NpyAxialDataset(
-            index_json    = index_json,
-            transform     = transform,
-            masker        = masker,
-            patch_size    = cfg["model"].get("patch_size",   8),
-            bg_threshold  = data_cfg.get("bg_threshold",    -800.0),
-            min_body_frac = data_cfg.get("min_body_frac",   0.05),
-            cache_size    = data_cfg.get("cache_size",       8),
-        )
-
-    # if dist.is_initialized() and index_json and not Path(index_json).exists():
-    #     if is_main:
-    #         dataset = _build_dataset()   # rank 0 scans + writes the JSON
-    #     dist.barrier()                   # all others wait
-    #     if not is_main:
-    #         dataset = _build_dataset()   # now the JSON exists → fast load
-    # else:
-    #     dataset = _build_dataset()
+        index_json    = index_json,
+        transform     = transform,
+        masker        = masker,
+        patch_size    = cfg["model"].get("patch_size",   8),
+        bg_threshold  = data_cfg.get("bg_threshold",    -800.0),
+        min_body_frac = data_cfg.get("min_body_frac",   0.05),
+        cache_size    = data_cfg.get("cache_size",       8),
+    )
 
     if is_main:
         logger.info(f"Dataset: {len(dataset):,} valid axial slices")
@@ -291,29 +253,7 @@ def main() -> None:
         resume_path      = args.resume,
     )
 
-    # ---- Profiler setup ----
-    # Active uniquement sur rank 0 pour éviter l'overhead sur tous les GPUs.
-    # Schedule : 5 steps ignorés (JIT/compile chauffe) + 5 warmup + 3 actifs = 13 steps.
-    # Les traces sont écrites dans output_dir/profiler/ au format TensorBoard.
-    if args.profile and is_main:
-        profile_dir = str(Path(args.output_dir) / "profiler")
-        prof = profile(
-            activities      = [ProfilerActivity.CPU, ProfilerActivity.CUDA],
-            schedule        = torch.profiler.schedule(wait=5, warmup=5, active=3),
-            on_trace_ready  = torch.profiler.tensorboard_trace_handler(profile_dir),
-            record_shapes   = True,
-            with_stack      = args.profile_with_stack,
-        )
-        prof.start()
-        logger.info(f"Profiler started — traces → {profile_dir}")
-    else:
-        prof = None
-
-    trainer.train(dataloader, profiler=prof)
-
-    if prof is not None:
-        prof.stop()
-        logger.info("Profiler stopped.")
+    trainer.train(dataloader)
 
     if dist.is_initialized():
         dist.destroy_process_group()
@@ -321,3 +261,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+    
