@@ -22,18 +22,19 @@ model:
 patch_sizes: [8, 16]
 
 data:
-  nifti_dir:        /lus/work/CT3/cad17796/SHARED/merlinabdominalctdataset/merlin_data
-  index_json:       /lus/work/CT3/cad17796/SHARED/New_Adastra_Hackathon/nifti_dino_axial/slice_index_tmp.json
-  n_global:         2
-  n_regional:       0   # pas de crops régionaux en Phase 1 (FlexiCT Table S2)
-  n_local:          8   # crops 112 px  (FlexiCT Table S2 : 8 × 112²)
-  global_crop_size: 256 # FlexiCT Table S2 : 2 × 256²  (512² = 4× plus de patches → OOM)
-  min_body_frac:    0.05
+  index_json:       /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json
+
   hu_clip_min:      -1000.0
   hu_clip_max:      1000.0
+
+  n_global:         2
+  n_regional:       0
+  n_local:          8
+  global_crop_size: 256
+  min_body_frac:    0.05
   bg_threshold:     -800.0
   num_workers:      8
-  cache_size:       4
+  cache_size:       8  
 
 transforms:
   hflip_prob:  0.5
