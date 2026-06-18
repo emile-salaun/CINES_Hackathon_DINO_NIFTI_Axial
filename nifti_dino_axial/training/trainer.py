@@ -227,7 +227,9 @@ class DINOv3Trainer:
             self.tb_writer = None
 
         # ---- Student ----
-        self.student_backbone = student_backbone.to(self.device)
+        # self.student_backbone = student_backbone.to(self.device)
+        self.student_backbone = student_backbone.to(self.device, dtype=torch.bfloat16)
+        self.teacher_backbone = backbone_factory().to(self.device, dtype=torch.bfloat16)
         embed_dim       = cfg["model"]["embed_dim"]
         dino_out_dim    = cfg["loss"]["dino_out_dim"]
         head_hidden     = cfg["loss"].get("head_hidden",     2048)
@@ -235,10 +237,13 @@ class DINOv3Trainer:
 
         self.dino_head = DINOHead(embed_dim, dino_out_dim,
                                   hidden_dim=head_hidden,
-                                  bottleneck_dim=head_bottleneck).to(self.device)
+                                  bottleneck_dim=head_bottleneck).to(self.device , dtype=torch.bfloat16)
         self.ibot_head = DINOHead(embed_dim, dino_out_dim,
                                   hidden_dim=head_hidden,
-                                  bottleneck_dim=head_bottleneck).to(self.device)
+                                  bottleneck_dim=head_bottleneck).to(self.device, dtype=torch.bfloat16)
+
+        # self.dino_head = DINOHead(...).to(self.device)
+        # self.ibot_head = DINOHead(...).to(self.device, dtype=torch.bfloat16)
 
         # ---- Teacher (EMA, no grad) ----
         # deepcopy fails when nn.utils.weight_norm is applied to any layer
@@ -247,13 +252,17 @@ class DINOv3Trainer:
         self.teacher_backbone = backbone_factory().to(self.device)
         self.teacher_backbone.load_state_dict(student_backbone.state_dict())
         self.teacher_backbone.eval()   # no dropout / drop-path during EMA inference
+
+        # self.teacher_dino_head = DINOHead(...).to(self.device, dtype=torch.bfloat16)
+        # self.teacher_ibot_head = DINOHead(...).to(self.device, dtype=torch.bfloat16)
+
         self.teacher_dino_head = DINOHead(embed_dim, dino_out_dim,
                                           hidden_dim=head_hidden,
-                                          bottleneck_dim=head_bottleneck).to(self.device)
+                                          bottleneck_dim=head_bottleneck).to(self.device, dtype=torch.bfloat16)
         self.teacher_dino_head.load_state_dict(self.dino_head.state_dict())
         self.teacher_ibot_head = DINOHead(embed_dim, dino_out_dim,
                                           hidden_dim=head_hidden,
-                                          bottleneck_dim=head_bottleneck).to(self.device)
+                                          bottleneck_dim=head_bottleneck).to(self.device, dtype=torch.bfloat16)
         self.teacher_ibot_head.load_state_dict(self.ibot_head.state_dict())
         for p in (*self.teacher_backbone.parameters(),
                   *self.teacher_dino_head.parameters(),
@@ -276,7 +285,8 @@ class DINOv3Trainer:
                     n_bad = _bad.sum().item()
                     logger.warning(
                         f"[rank {self.rank}] {_mname}.{_pname}: "
-                        f"{n_bad} NaN/Inf values after init — zeroing"
+                        f"{n_bad} NaN/Inf values after init "
+                        f"(torch.empty not in checkpoint) — zeroing"
                     )
                     _p.data[_bad] = 0.0
                 _large = _p.data.abs() > _SAFE_MAX
@@ -284,7 +294,8 @@ class DINOv3Trainer:
                     n_large = _large.sum().item()
                     logger.warning(
                         f"[rank {self.rank}] {_mname}.{_pname}: "
-                        f"{n_large} very-large values (|x|>{_SAFE_MAX}) — zeroing"
+                        f"{n_large} very-large values (|x|>{_SAFE_MAX}) "
+                        f"(torch.empty garbage) — zeroing"
                     )
                     _p.data[_large] = 0.0
 
@@ -308,15 +319,15 @@ class DINOv3Trainer:
             student_temp    = loss_cfg.get("student_temp",    0.1),
             teacher_temp    = loss_cfg.get("teacher_temp",    0.04),
             center_momentum = loss_cfg.get("center_momentum", 0.9),
-        ).to(self.device)
+        ).to(self.device,  dtype=torch.bfloat16)
         self.ibot_loss = iBOTLoss(
             dino_out_dim,
             student_temp    = loss_cfg.get("student_temp",    0.1),
             teacher_temp    = loss_cfg.get("teacher_temp",    0.04),
             center_momentum = loss_cfg.get("center_momentum", 0.9),
-        ).to(self.device)
+        ).to(self.device,  dtype=torch.bfloat16)
 
-        self.koleo = KoLeoLoss().to(self.device)
+        self.koleo = KoLeoLoss().to(self.device, dtype=torch.bfloat16)
 
         # ---- Optimiser (AdamW + layer-wise LR decay, FlexiCT paper §3) ----
         optim_cfg = cfg["optim"]
@@ -352,7 +363,7 @@ class DINOv3Trainer:
             for pg in self.optimizer.param_groups
         ]
 
-        self.use_bf16          = cfg.get("bf16", True)
+        self.use_bf16          = cfg.get("bf16", False)
         self.grad_ckpt         = cfg.get("grad_ckpt", False)
         self.total_steps       = cfg["training"]["total_steps"]
         self.warmup_steps      = cfg["training"]["warmup_steps"]
@@ -361,12 +372,15 @@ class DINOv3Trainer:
         # Keep only the last N full checkpoints (each ~3 GB) to avoid filling $WORK.
         # Model-only checkpoints (BF16 teacher backbone, ~300 MB each) are kept all.
         self.keep_checkpoints  = cfg["training"].get("keep_checkpoints",     3)
-        self.grad_clip         = cfg["optim"].get("grad_clip",             3.0)
-        self.koleo_weight      = loss_cfg.get("koleo_weight",              0.1)
-        self.ibot_weight       = loss_cfg.get("ibot_weight",               1.0)
-        self.gram_weight       = loss_cfg.get("gram_weight",               0.0)
-        self.step              = 0
+        self.grad_clip      = cfg["optim"].get("grad_clip",       3.0)
+        self.koleo_weight   = loss_cfg.get("koleo_weight",        0.1)
+        self.ibot_weight    = loss_cfg.get("ibot_weight",         1.0)
+        self.gram_weight    = loss_cfg.get("gram_weight",         0.0)
+        self.step           = 0
 
+        # Flexi patch sizes: sample one per training step.
+        # The dataset generates masks at base_patch_size; _adapt_masks() downsizes
+        # them on-the-fly when a larger patch size is sampled.
         self.base_patch_size = cfg["model"]["patch_size"]
         _ps_cfg = cfg.get("patch_sizes", None)
         self.patch_sizes: list[int] = sorted(_ps_cfg) if _ps_cfg else [self.base_patch_size]
@@ -478,10 +492,13 @@ class DINOv3Trainer:
         # The DINO head (CLS tokens only) stays in float32 — output is tiny (batch × 65536).
         with torch.no_grad(), amp_ctx:
             t_out   = self._run_backbone(self.teacher_backbone, global_crops, [None] * n_global)
-            t_cls   = [o["x_norm_clstoken"].float() for o in t_out]  # float32 — tiny
+            # t_cls   = [o["x_norm_clstoken"].float() for o in t_out]  # float32 — tiny
+
+            t_cls   = [o["x_norm_clstoken"] for o in t_out]
+
             t_patch = [o["x_norm_patchtokens"]       for o in t_out]  # BF16 — large
-        with torch.no_grad():                                          # float32 DINO (tiny)
-            t_dino  = [self.teacher_dino_head(c) for c in t_cls]
+        with torch.no_grad(), amp_ctx:
+            t_dino = [self.teacher_dino_head(c) for c in t_cls]
         with torch.no_grad(), amp_ctx:                                 # BF16 iBOT
             t_ibot  = [self.teacher_ibot_head(p) for p in t_patch]
 
@@ -490,10 +507,12 @@ class DINOv3Trainer:
         all_masks = list(global_masks) + [None] * (n_regional + n_local)
         with amp_ctx:
             s_out   = self._run_backbone(self.student_backbone, all_crops, all_masks)
-            s_cls   = [o["x_norm_clstoken"].float() for o in s_out]           # float32 — tiny
+            # s_cls   = [o["x_norm_clstoken"].float() for o in s_out]           # float32 — tiny
+            s_cls   = [o["x_norm_clstoken"] for o in s_out]
             s_patch = [o["x_norm_patchtokens"]       for o in s_out[:n_global]]  # BF16 — large
         # DINO head in float32 (CLS tokens — no memory issue)
-        s_dino  = [self.dino_head(c) for c in s_cls]
+        with amp_ctx:
+            s_dino = [self.dino_head(c) for c in s_cls]
         # iBOT head in BF16 — gradients flow through BF16 autocast correctly
         with amp_ctx:
             s_ibot  = [self.ibot_head(p) for p in s_patch]
@@ -526,7 +545,7 @@ class DINOv3Trainer:
     # Training loop
     # ------------------------------------------------------------------
 
-    def train(self, dataloader: DataLoader, profiler=None) -> None:
+    def train(self, dataloader: DataLoader) -> None:
         cfg       = self.cfg
         base_lr   = cfg["optim"]["base_lr"]
         wd_start  = cfg["optim"].get("wd_start",  0.04)
@@ -576,9 +595,6 @@ class DINOv3Trainer:
             ema_update(_bb(self.ibot_head),        self.teacher_ibot_head, ema)
 
             self.step += 1
-
-            if profiler is not None:
-                profiler.step()
 
             if self.is_main and self.step % self.log_every == 0:
                 _t_now       = time.time()

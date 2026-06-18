@@ -184,7 +184,8 @@ class NpyAxialDataset(Dataset):
         sl = vol[:, :, z]                           # memmap view, float16
 
         # Cast to float32 for torch (float16 tensor ops are limited on CPU)
-        hu_slice = torch.from_numpy(sl.astype(np.float32))   # (H, W)
+        # hu_slice = torch.from_numpy(sl.astype(np.float32))   # (H, W)
+        hu_slice = torch.from_numpy(sl) 
 
         # Runtime body-fraction guard (almost always passes — index pre-filtered)
         frac = float((hu_slice > self.bg_threshold).float().mean())
