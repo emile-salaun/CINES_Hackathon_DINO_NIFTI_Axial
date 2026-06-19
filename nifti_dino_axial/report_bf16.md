@@ -78,3 +78,25 @@ Convention : **5 lignes par run** — setup / perf / observation / vs fp32 / ver
 - **Observation** : pas d'OOM, pas de NCCL timeout, scaling inter-node Slingshot OK. Loss step 50→100 = `21.40 → 21.68` = même hump bf16 doux observé à 1n.
 - **vs fp32 2n × 4 b40 (108.8 img/s)** : **+33% throughput** (144.2 vs 108.8). Gain bf16 inter-node MEILLEUR que mono-node (+25%) → bf16 réduit la pression mémoire ce qui aide aussi DDP all-reduce (gradients plus petits = moins de bandwidth Slingshot consommé).
 - **Verdict** : 🟢🟢 multi-node bf16 fonctionne et **booste plus que mono-node**. ETA 10M = 19h sur 2 nœuds (vs 25.5h fp32) = gain quasi-1 jour. Promet bien pour 4n × 4 → projection bf16 ~290 img/s = 9.5h ETA 10M (vs fp32 12.8h).
+
+---
+
+## Run 7 — Job 5079392 : **4n × 4 APUs b40 bf16** 🎯 hero number
+
+- **Setup** : `RUN_TAG=b40 BIND_STRATEGY=mi300_srun4 ./launch.parsable.sh 4 4 MI300 48` sur a[1003-1004,1019-1020]. World_size=16 ranks. Cible historique : battre fp32 217.6 img/s.
+- **Perf** : 3 mesures warm stables steps 100-200 = `275.7 / 272.3 / 272.2` img/s. **Médiane = 273.4 img/s = 0.43 it/s**. ETA 10M = **10.2 h (0.42 j)**. Cancel à 10:02.
+- **Observation** : it/s STRICTEMENT constant à 0.43 sur 3 mesures = excellent steady-state. Loss hump bf16 reproductible (`21.33 → 21.68 → 21.99 → 22.11`). Pas d'OOM, pas de NCCL timeout, scaling Slingshot 4 nodes stable.
+- **vs fp32 4n × 4 b40 (217.6 img/s)** : **+26% throughput** (273.4 vs 217.6). ETA 10M passe de 12.8h fp32 → 10.2h bf16 = **−2.6h** sur Phase 1 complète.
+- **Verdict** : 🟢🟢 **Phase 1 8M samples = ~3.4h** sur 4 nodes bf16 (vs ~4.2h fp32). **Scaling bf16 :** 1n→2n = 90% eff (144.2/160), 2n→4n = 95% eff (273.4/288.4). Quasi-linéaire post 1er hop = même pattern que fp32 mais à 26% throughput plus haut.
+
+---
+
+## 🏆 Synthèse bf16 multi-node
+
+| Setup | fp32 (HPE_adastra) | bf16 (dev_hpe) | Δ |
+|---|---:|---:|---:|
+| 1n × 4 (4 GPUs) | 64.0 | **80.0** | +25% |
+| 2n × 4 (8 GPUs) | 108.8 | **144.2** | +33% |
+| 4n × 4 (16 GPUs) | 217.6 | **273.4** | +26% |
+
+**ETA Phase 1 (8M samples) sur 4n bf16 = ~8h** (vs fp32 ~10h). Projection 8n bf16 ~530 img/s = ETA 10M ~5.2h.

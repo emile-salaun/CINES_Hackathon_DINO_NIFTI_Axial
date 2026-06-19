@@ -13,3 +13,4 @@ mi300a;1;4;48;192;bf16;0.39;74.5;37.3;1.55;TBD;5078975;4 APUs mi300_srun4 b48 bf
 mi300a;1;4;64;256;bf16;0.29;73.7;37.7;1.57;TBD;5079019;4 APUs mi300_srun4 b64 bf16 (vs fp32 OOM = unlock, VRAM 80%, plateau ~74 img/s = saturation memory bandwidth)
 mi300a;1;4;80;320;bf16;OOM;OOM;-;-;-;5079134;4 APUs mi300_srun4 b80 bf16 OOM (2 oom_kill tasks 1+3 a 8m22s, mema activations bf16 reste trop grosse, b80 PAS unlock par bf16)
 mi300a;2;8;40;320;bf16;0.45;144.2;19.3;0.80;TBD;5079200;2n x 4 APUs mi300_srun4 b40 bf16 (1 warm step seulement, +33% vs fp32 108.8, ETA 10M -24% = 19.3h)
+mi300a;4;16;40;640;bf16;0.43;273.4;10.2;0.42;TBD;5079392;4n x 4 APUs mi300_srun4 b40 bf16 (3 mesures stables 272-275, +26% vs fp32 217.6, ETA 10M -21% = 10.2h)
