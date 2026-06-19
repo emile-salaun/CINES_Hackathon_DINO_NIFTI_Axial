@@ -1,0 +1,402 @@
+Info: See Adastra AI module documentation at:
+https://dci.dci-gitlab.cines.fr/webextranet/software_stack/AI/index.html (or
+type module load venv) 
+Job started at Thu, 18 Jun 2026 17:22:19 +0200
+BIND_STRATEGY=mi300_srun4  wrapper=/lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/scripts/srun_mi300.sh  config=/lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/configs/phase1_b40.yaml  output=/lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/checkpoints/mi300_mi300_srun4_b40_4n_run  (4 SLURM tasks/node, no torchrun)
+[srun_mi300] rank=1/16  local=1  cpu=24-47,120-143  master=a1019:29400
+[srun_mi300] rank=2/16  local=2  cpu=48-71,144-167  master=a1019:29400
+[srun_mi300] rank=0/16  local=0  cpu=0-23,96-119  master=a1019:29400
+[srun_mi300] rank=3/16  local=3  cpu=72-95,168-191  master=a1019:29400
+[srun_mi300] rank=6/16  local=2  cpu=48-71,144-167  master=a1019:29400
+[srun_mi300] rank=7/16  local=3  cpu=72-95,168-191  master=a1019:29400
+[srun_mi300] rank=5/16  local=1  cpu=24-47,120-143  master=a1019:29400
+[srun_mi300] rank=4/16  local=0  cpu=0-23,96-119  master=a1019:29400
+[srun_mi300] rank=9/16  local=1  cpu=24-47,120-143  master=a1019:29400
+[srun_mi300] rank=8/16  local=0  cpu=0-23,96-119  master=a1019:29400
+[srun_mi300] rank=11/16  local=3  cpu=72-95,168-191  master=a1019:29400
+[srun_mi300] rank=10/16  local=2  cpu=48-71,144-167  master=a1019:29400
+[srun_mi300] rank=12/16  local=0  cpu=0-23,96-119  master=a1019:29400
+[srun_mi300] rank=15/16  local=3  cpu=72-95,168-191  master=a1019:29400
+[srun_mi300] rank=14/16  local=2  cpu=48-71,144-167  master=a1019:29400
+[srun_mi300] rank=13/16  local=1  cpu=24-47,120-143  master=a1019:29400
+17:22:43 INFO [__main__] Config     : /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/configs/phase1_b40.yaml
+17:22:43 INFO [__main__] Output dir : /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/checkpoints/mi300_mi300_srun4_b40_4n_run
+17:22:43 INFO [__main__] Effective : local_batch_size=40  num_workers=8  prefetch_factor=2  grad_ckpt=True  world_size=16
+17:22:46 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:46 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:46 INFO [dinov3] using base=100.0 for rope new
+17:22:46 INFO [dinov3] using min_period=None for rope new
+17:22:46 INFO [dinov3] using max_period=None for rope new
+17:22:46 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:46 INFO [dinov3] using shift_coords=None for rope new
+17:22:46 INFO [dinov3] using rescale_coords=None for rope new
+17:22:46 INFO [dinov3] using jitter_coords=None for rope new
+17:22:46 INFO [dinov3] using dtype=bf16 for rope new
+17:22:46 INFO [dinov3] using base=100.0 for rope new
+17:22:46 INFO [dinov3] using min_period=None for rope new
+17:22:46 INFO [dinov3] using max_period=None for rope new
+17:22:46 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:46 INFO [dinov3] using shift_coords=None for rope new
+17:22:46 INFO [dinov3] using rescale_coords=None for rope new
+17:22:46 INFO [dinov3] using jitter_coords=None for rope new
+17:22:46 INFO [dinov3] using dtype=bf16 for rope new
+17:22:46 INFO [dinov3] using mlp layer as FFN
+17:22:46 INFO [dinov3] using mlp layer as FFN
+17:22:46 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:46 INFO [dinov3] using base=100.0 for rope new
+17:22:46 INFO [dinov3] using min_period=None for rope new
+17:22:46 INFO [dinov3] using max_period=None for rope new
+17:22:46 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:46 INFO [dinov3] using shift_coords=None for rope new
+17:22:46 INFO [dinov3] using rescale_coords=None for rope new
+17:22:46 INFO [dinov3] using jitter_coords=None for rope new
+17:22:46 INFO [dinov3] using dtype=bf16 for rope new
+17:22:46 INFO [dinov3] using mlp layer as FFN
+17:22:47 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:47 INFO [__main__] Dataset: 10,604,577 valid axial slices
+17:22:47 INFO [dinov3] using base=100.0 for rope new
+17:22:47 INFO [dinov3] using min_period=None for rope new
+17:22:47 INFO [dinov3] using max_period=None for rope new
+17:22:47 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:47 INFO [dinov3] using shift_coords=None for rope new
+17:22:47 INFO [dinov3] using rescale_coords=None for rope new
+17:22:47 INFO [dinov3] using jitter_coords=None for rope new
+17:22:47 INFO [dinov3] using dtype=bf16 for rope new
+17:22:47 INFO [dinov3] using mlp layer as FFN
+17:22:48 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:48 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:48 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:49 INFO [__main__] Pretrained weights: /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:49 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:49 INFO [nifti_dino_axial.training.trainer] [rank 0] TensorBoard not available (pip install tensorboard to enable)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:50 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:50 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:50 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:50 INFO [dinov3] using base=100.0 for rope new
+17:22:50 INFO [dinov3] using min_period=None for rope new
+17:22:50 INFO [dinov3] using max_period=None for rope new
+17:22:50 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:50 INFO [dinov3] using shift_coords=None for rope new
+17:22:50 INFO [dinov3] using rescale_coords=None for rope new
+17:22:50 INFO [dinov3] using jitter_coords=None for rope new
+17:22:50 INFO [dinov3] using dtype=bf16 for rope new
+17:22:50 INFO [dinov3] using mlp layer as FFN
+17:22:52 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:52 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:52 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:52 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:52 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:52 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:52 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:52 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:53 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:53 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:53 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+17:22:53 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+17:22:54 INFO [dinov3] using base=100.0 for rope new
+17:22:54 INFO [dinov3] using min_period=None for rope new
+17:22:54 INFO [dinov3] using max_period=None for rope new
+17:22:54 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:54 INFO [dinov3] using shift_coords=None for rope new
+17:22:54 INFO [dinov3] using rescale_coords=None for rope new
+17:22:54 INFO [dinov3] using jitter_coords=None for rope new
+17:22:54 INFO [dinov3] using dtype=bf16 for rope new
+17:22:54 INFO [dinov3] using mlp layer as FFN
+17:22:54 INFO [dinov3] using base=100.0 for rope new
+17:22:54 INFO [dinov3] using min_period=None for rope new
+17:22:54 INFO [dinov3] using max_period=None for rope new
+17:22:54 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:54 INFO [dinov3] using shift_coords=None for rope new
+17:22:54 INFO [dinov3] using rescale_coords=None for rope new
+17:22:54 INFO [dinov3] using jitter_coords=None for rope new
+17:22:54 INFO [dinov3] using dtype=bf16 for rope new
+17:22:54 INFO [dinov3] using mlp layer as FFN
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+17:22:54 INFO [dinov3] using base=100.0 for rope new
+17:22:54 INFO [dinov3] using min_period=None for rope new
+17:22:54 INFO [dinov3] using max_period=None for rope new
+17:22:54 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:54 INFO [dinov3] using shift_coords=None for rope new
+17:22:54 INFO [dinov3] using rescale_coords=None for rope new
+17:22:54 INFO [dinov3] using jitter_coords=None for rope new
+17:22:54 INFO [dinov3] using dtype=bf16 for rope new
+17:22:54 INFO [dinov3] using mlp layer as FFN
+17:22:54 INFO [dinov3] using base=100.0 for rope new
+17:22:54 INFO [dinov3] using min_period=None for rope new
+17:22:54 INFO [dinov3] using max_period=None for rope new
+17:22:54 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:54 INFO [dinov3] using shift_coords=None for rope new
+17:22:54 INFO [dinov3] using rescale_coords=None for rope new
+17:22:54 INFO [dinov3] using jitter_coords=None for rope new
+17:22:54 INFO [dinov3] using dtype=bf16 for rope new
+17:22:54 INFO [dinov3] using mlp layer as FFN
+17:22:54 INFO [dinov3] using base=100.0 for rope new
+17:22:54 INFO [dinov3] using min_period=None for rope new
+17:22:54 INFO [dinov3] using max_period=None for rope new
+17:22:54 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:54 INFO [dinov3] using shift_coords=None for rope new
+17:22:54 INFO [dinov3] using rescale_coords=None for rope new
+17:22:54 INFO [dinov3] using jitter_coords=None for rope new
+17:22:54 INFO [dinov3] using dtype=bf16 for rope new
+17:22:54 INFO [dinov3] using mlp layer as FFN
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+17:22:54 INFO [dinov3] using base=100.0 for rope new
+17:22:54 INFO [dinov3] using min_period=None for rope new
+17:22:54 INFO [dinov3] using max_period=None for rope new
+17:22:54 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:54 INFO [dinov3] using shift_coords=None for rope new
+17:22:54 INFO [dinov3] using rescale_coords=None for rope new
+17:22:54 INFO [dinov3] using jitter_coords=None for rope new
+17:22:54 INFO [dinov3] using dtype=bf16 for rope new
+17:22:54 INFO [dinov3] using mlp layer as FFN
+17:22:54 INFO [dinov3] using base=100.0 for rope new
+17:22:54 INFO [dinov3] using min_period=None for rope new
+17:22:54 INFO [dinov3] using max_period=None for rope new
+17:22:54 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:54 INFO [dinov3] using shift_coords=None for rope new
+17:22:54 INFO [dinov3] using rescale_coords=None for rope new
+17:22:54 INFO [dinov3] using jitter_coords=None for rope new
+17:22:54 INFO [dinov3] using dtype=bf16 for rope new
+17:22:54 INFO [dinov3] using mlp layer as FFN
+17:22:54 INFO [dinov3] using base=100.0 for rope new
+17:22:54 INFO [dinov3] using min_period=None for rope new
+17:22:54 INFO [dinov3] using max_period=None for rope new
+17:22:54 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:54 INFO [dinov3] using shift_coords=None for rope new
+17:22:54 INFO [dinov3] using rescale_coords=None for rope new
+17:22:54 INFO [dinov3] using jitter_coords=None for rope new
+17:22:54 INFO [dinov3] using dtype=bf16 for rope new
+17:22:54 INFO [dinov3] using mlp layer as FFN
+17:22:54 INFO [dinov3] using base=100.0 for rope new
+17:22:54 INFO [dinov3] using min_period=None for rope new
+17:22:54 INFO [dinov3] using max_period=None for rope new
+17:22:54 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:54 INFO [dinov3] using shift_coords=None for rope new
+17:22:54 INFO [dinov3] using rescale_coords=None for rope new
+17:22:54 INFO [dinov3] using jitter_coords=None for rope new
+17:22:54 INFO [dinov3] using dtype=bf16 for rope new
+17:22:54 INFO [dinov3] using mlp layer as FFN
+17:22:54 INFO [dinov3] using base=100.0 for rope new
+17:22:54 INFO [dinov3] using min_period=None for rope new
+17:22:54 INFO [dinov3] using max_period=None for rope new
+17:22:54 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:54 INFO [dinov3] using shift_coords=None for rope new
+17:22:54 INFO [dinov3] using rescale_coords=None for rope new
+17:22:54 INFO [dinov3] using jitter_coords=None for rope new
+17:22:54 INFO [dinov3] using dtype=bf16 for rope new
+17:22:54 INFO [dinov3] using mlp layer as FFN
+17:22:54 INFO [dinov3] using base=100.0 for rope new
+17:22:54 INFO [dinov3] using min_period=None for rope new
+17:22:54 INFO [dinov3] using max_period=None for rope new
+17:22:54 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:54 INFO [dinov3] using shift_coords=None for rope new
+17:22:54 INFO [dinov3] using rescale_coords=None for rope new
+17:22:54 INFO [dinov3] using jitter_coords=None for rope new
+17:22:54 INFO [dinov3] using dtype=bf16 for rope new
+17:22:54 INFO [dinov3] using mlp layer as FFN
+17:22:54 INFO [dinov3] using base=100.0 for rope new
+17:22:54 INFO [dinov3] using min_period=None for rope new
+17:22:54 INFO [dinov3] using max_period=None for rope new
+17:22:54 INFO [dinov3] using normalize_coords=separate for rope new
+17:22:54 INFO [dinov3] using shift_coords=None for rope new
+17:22:54 INFO [dinov3] using rescale_coords=None for rope new
+17:22:54 INFO [dinov3] using jitter_coords=None for rope new
+17:22:54 INFO [dinov3] using dtype=bf16 for rope new
+17:22:54 INFO [dinov3] using mlp layer as FFN
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 6] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 0] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 7] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 5] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 2] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 3] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 13] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 15] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 4] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 10] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 11] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 9] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 8] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 1] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 12] Flexi patch sizes: [8, 16]  (base=8)
+17:23:15 INFO [nifti_dino_axial.training.trainer] [rank 14] Flexi patch sizes: [8, 16]  (base=8)
+17:27:09 INFO [nifti_dino_axial.training.trainer] step=     50/200000  loss=21.4160  dino=10.7640  ibot=10.6218  koleo=0.3013  gram=0.0000  ps=16  lr=3.92e-06  ema=0.99400  it/s=0.22  eta=257h24m
+17:29:32 INFO [nifti_dino_axial.training.trainer] step=    100/200000  loss=21.7434  dino=10.8939  ibot=10.8033  koleo=0.4619  gram=0.0000  ps=8  lr=7.92e-06  ema=0.99400  it/s=0.35  eta=158h42m
+17:32:09 INFO [nifti_dino_axial.training.trainer] step=    150/200000  loss=21.6796  dino=10.8171  ibot=10.7781  koleo=0.8442  gram=0.0000  ps=16  lr=1.19e-05  ema=0.99400  it/s=0.32  eta=174h52m
+17:34:28 INFO [nifti_dino_axial.training.trainer] step=    200/200000  loss=21.4875  dino=10.6929  ibot=10.6980  koleo=0.9661  gram=0.0000  ps=16  lr=1.59e-05  ema=0.99400  it/s=0.36  eta=154h10m
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** STEP 5076666.0 ON a1019 CANCELLED AT 2026-06-18T17:36:24 ***
+slurmstepd: error: *** JOB 5076666 ON a1019 CANCELLED AT 2026-06-18T17:36:24 ***
