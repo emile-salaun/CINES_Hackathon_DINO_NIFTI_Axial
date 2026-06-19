@@ -9,7 +9,7 @@
 # -----------------------------------------------------------------
 
 export SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export DIR="/lus/scratch/BCINES/dci/salaun/hackathon-juin/gh/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial"
+export DIR="${DIR:-/lus/scratch/BCINES/dci/salaun/hackathon-juin/gh/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial}"
 
 # -----------------------------------------------------------------
 # Args (optionnels)
@@ -63,7 +63,8 @@ echo ""
 # -----------------------------------------------------------------
 
 JOB_ID=$(sbatch --parsable \
-    --account=dci \
+    --account="${SBATCH_ACCOUNT:-dci}" \
+    ${SBATCH_RESERVATION:+--reservation=$SBATCH_RESERVATION} \
     --job-name=nifti_dino \
     --nodes="$NNODES" \
     --gpus-per-node="$GPUS_PER_NODE" \
