@@ -68,3 +68,13 @@ Convention : **5 lignes par run** — setup / perf / observation / vs fp32 / ver
 | b80 | ❌ OOM | — | >100% | — |
 
 **Sweet spot mono-node bf16 = b40 = 80 img/s = +25% vs fp32 b40 (64 img/s)**.
+
+---
+
+## Run 6 — Job 5079200 : **2n × 4 APUs b40 bf16** ⭐
+
+- **Setup** : `RUN_TAG=b40 BIND_STRATEGY=mi300_srun4 ./launch.parsable.sh 2 4 MI300 48` sur a[1003-1004]. Premier run multi-node bf16. World_size=8 ranks DDP via srun_mi300_bind, NCCL traverse Slingshot inter-node.
+- **Perf** : 1 mesure warm (step 100) = **0.45 it/s = 144.2 img/s**. ETA 10M = **19.3 h (0.80 j)**. Cancel à ~6:30 (suffisant pour signal warm). Step 50 warmup à 102.2 img/s.
+- **Observation** : pas d'OOM, pas de NCCL timeout, scaling inter-node Slingshot OK. Loss step 50→100 = `21.40 → 21.68` = même hump bf16 doux observé à 1n.
+- **vs fp32 2n × 4 b40 (108.8 img/s)** : **+33% throughput** (144.2 vs 108.8). Gain bf16 inter-node MEILLEUR que mono-node (+25%) → bf16 réduit la pression mémoire ce qui aide aussi DDP all-reduce (gradients plus petits = moins de bandwidth Slingshot consommé).
+- **Verdict** : 🟢🟢 multi-node bf16 fonctionne et **booste plus que mono-node**. ETA 10M = 19h sur 2 nœuds (vs 25.5h fp32) = gain quasi-1 jour. Promet bien pour 4n × 4 → projection bf16 ~290 img/s = 9.5h ETA 10M (vs fp32 12.8h).
