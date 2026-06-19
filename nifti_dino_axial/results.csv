@@ -1,0 +1,10 @@
+GPU;#Nodes;#GPUs;BS_local;BS_global;precision;it/s;image/s;ETA_10M_hours;ETA_10M_days;DDP_eff_pct;JOB_ID;commentaire
+mi300a;1;1;10;10;fp32;1.52;15.2;182.7;7.61;100;5075334;1 APU isole baseline b10 (reference scaling)
+mi300a;1;1;40;40;fp32;0.59;23.6;117.7;4.90;100;5075376;1 APU isole baseline b40 (+55% s/s/GPU vs b10)
+mi300a;1;2;10;20;fp32;1.30;26.0;106.8;4.45;86;5075416;2 APUs mi300_numa b10
+mi300a;1;2;40;80;fp32;0.50;40.0;69.4;2.89;85;5075441;2 APUs mi300_numa b40
+mi300a;1;4;10;40;fp32;1.26;50.4;55.1;2.30;83;5075501;4 APUs mi300_numa b10 (scaling b10 quasi-flat)
+mi300a;1;4;40;160;fp32;0.40;64.0;43.4;1.81;68;5075686;4 APUs mi300_numa b40 (scaling b40 sature -15pt/doublement)
+mi300a;2;8;40;320;fp32;0.34;108.8;25.5;1.06;58;5076377;2n x 4 APUs mi300_srun4 b40 (85% scaling vs lineaire, inter-node OK)
+mi300a;4;16;40;640;fp32;0.34;217.6;12.8;0.53;58;5076666;4n x 4 APUs mi300_srun4 b40 (100% scaling vs 2n, plateau flat post 1er hop)
+mi300a;1;4;40;160;bf16;0.50;80.0;34.7;1.45;TBD;5078636;4 APUs mi300_srun4 b40 bf16 (+25% throughput vs fp32, loss instable step 100-200 puis re-descente step 250)
