@@ -75,8 +75,7 @@ case "${BIND_STRATEGY:-none}" in
         export MIOPEN_CUSTOM_CACHE_DIR="${MIOPEN_BASE}/cache"
         mkdir -p "$MIOPEN_USER_DB_PATH" "$MIOPEN_CUSTOM_CACHE_DIR"
 
-        SCRIPT_DIR="${SCRIPT_DIR:-$(dirname "$DIR")/scripts}"
-        BIND_WRAPPER="${SCRIPT_DIR}/srun_mi300_bind.sh"
+        BIND_WRAPPER="$(dirname "$DIR")/scripts/srun_mi300_bind.sh"
         CFG_PATH="$DIR/configs/phase1${RUN_TAG:+_${RUN_TAG}}.yaml"
         OUT_DIR="$DIR/checkpoints/${CONSTRAINT,,}_${BIND_STRATEGY}${RUN_TAG:+_${RUN_TAG}}_${SLURM_JOB_NUM_NODES}n_${SLURM_JOB_ID}"
         echo "BIND_STRATEGY=mi300_srun4  wrapper=${BIND_WRAPPER}  config=${CFG_PATH}  output=${OUT_DIR}"
