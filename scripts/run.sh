@@ -4,7 +4,7 @@
 #  NIfTI DINO Axial — job body (sourced by sbatch via launch.sh)
 #==================================================================
 
-export DIR="$SCRATCH/hackathon-juin/gh/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial"
+export DIR="${DIR:-$SCRATCH/hackathon-juin/gh/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial}"
 
 mkdir -p ./logs
 
