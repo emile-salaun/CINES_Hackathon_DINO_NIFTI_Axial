@@ -1,0 +1,88 @@
+# DINOv3 Phase 1 — axial NIfTI slices
+# Hyperparameters from FlexiCT Table S2
+
+# Key differences vs flexi_ct/configs/phase1.yaml:
+#   - data.nifti_dir      : path to folder containing .nii / .nii.gz files
+#   - data.index_json     : slice index cache (built on first run, reused after)
+#   - transforms.filter_prob : probability of hard/soft kernel augmentation
+#   - masking.*           : anatomically guided masking parameters
+
+phase: 1
+
+# FlexiCT 2D checkpoint used to initialise the backbone (teacher weights).
+# Override with --pretrained on the CLI, or set to null to train from scratch.
+pretrained_weights: ./models_pretrained/flexiCT/2D_final_model.pth
+
+model:
+  embed_dim:  864
+  patch_size: 8
+  depth:      16
+  num_heads:  12
+
+patch_sizes: [8, 16]
+
+data:
+  nifti_dir:        /lus/work/CT3/cad17796/SHARED/merlinabdominalctdataset/merlin_data
+  index_json:       /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json
+
+  hu_clip_min:      -1000.0
+  hu_clip_max:      1000.0
+
+  n_global:         2
+  n_regional:       0
+  n_local:          8
+  global_crop_size: 256
+  min_body_frac:    0.05
+  bg_threshold:     -800.0
+  num_workers:      8
+  prefetch_factor:  4
+  cache_size:       8  
+
+transforms:
+  hflip_prob:  0.5
+  filter_prob: 0.5
+
+masking:
+  mask_ratio:       0.40
+  min_aspect:       0.3
+  max_aspect:       3.3
+  max_block_area:   0.35
+  # gaussian_sigma: null   # default = 0.25 × grid_width
+  # n_fallback_iters: 50
+
+training:
+  total_steps:       200000
+  warmup_steps:      2500
+  local_batch_size:  40     # 256² / 8px = 1024 patches  → effective batch = 50×8 = 400
+  save_every:        5000   #
+  log_every:         50
+  keep_checkpoints:  3      # keep only the last N full ckpt_step*.pt (~3 GB each)
+
+optim:
+  base_lr:              2.0e-4
+  wd_start:             0.04
+  wd_end:               0.40
+  ema_start:            0.994
+  grad_clip:            3.0
+  # Layer-wise LR decay (FlexiCT paper §3): each block × 0.9 from top,
+  # patch embedding × 0.2.  Set llrd: null to disable (random-init training).
+  llrd:                 0.9
+  patch_embed_lr_mult:  0.2
+
+loss:
+  dino_out_dim:       65536
+  head_hidden:        2048
+  head_bottleneck:    256
+  student_temp:       0.1
+  teacher_temp:       0.04
+  center_momentum:    0.9
+  koleo_weight:       0.1    # KoLeo (Kozachenko-Leonenko) — same as FlexiCT / DINOv3
+  ibot_weight:        1.0
+  gram_weight:        0.0
+
+bf16: true
+
+# Gradient checkpointing: recomputes block activations during backward instead
+# of storing them.  Required to fit batch >= 2 at 512² on 44 GB GPUs (~70 %
+# activation memory reduction, ~20 % compute overhead).
+grad_ckpt: true
