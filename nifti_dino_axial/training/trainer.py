@@ -601,12 +601,17 @@ class DINOv3Trainer:
                 _elapsed     = _t_now - _t_last
                 _steps_done  = self.step - _step_last
                 _it_s        = _steps_done / max(_elapsed, 1e-6)
-                _steps_left  = self.total_steps - self.step
-                _eta_s       = _steps_left / max(_it_s, 1e-6)
-                _eta_h, _rem = divmod(int(_eta_s), 3600)
-                _eta_m       = _rem // 60
-                _t_last      = _t_now
-                _step_last   = self.step
+
+                _eta_target_samples = self.cfg.get("eta_target_samples", 10_000_000)
+                _samples_per_step   = self.cfg["training"]["local_batch_size"] * self.world_size
+                _samples_done       = self.step * _samples_per_step
+                _img_s              = _it_s * _samples_per_step
+                _samples_remaining  = max(0, _eta_target_samples - _samples_done)
+                _eta_s              = _samples_remaining / max(_img_s, 1e-6)
+                _eta_h, _rem        = divmod(int(_eta_s), 3600)
+                _eta_m              = _rem // 60
+                _t_last             = _t_now
+                _step_last          = self.step
 
                 logger.info(
                     f"step={self.step:>7d}/{self.total_steps}"
@@ -617,8 +622,8 @@ class DINOv3Trainer:
                     f"  gram={loss_dict['gram_loss'].item():.4f}"
                     f"  ps={loss_dict['patch_size']}"
                     f"  lr={lr:.2e}  ema={ema:.5f}"
-                    f"  it/s={_it_s:.2f}"
-                    f"  eta={_eta_h}h{_eta_m:02d}m"
+                    f"  it/s={_it_s:.2f}  img/s={_img_s:.1f}"
+                    f"  eta_10M={_eta_h}h{_eta_m:02d}m"
                 )
                 # ── JSONL + TensorBoard ────────────────────────────────────
                 _m = {
