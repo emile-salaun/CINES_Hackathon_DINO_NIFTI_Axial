@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MI300A — scaling DDP fp32 vs bf16 (HPE_adastra vs dev_hpe)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+         max-width: 1150px; margin: 1.5em auto; padding: 0 1.5em; color: #222; line-height: 1.5; }
+  h1 { border-bottom: 2px solid #d62728; padding-bottom: 0.3em; margin-bottom: 0.5em; }
+  h2 { margin-top: 2em; color: #444; }
+  .takeaways { background: #fff8e1; border-left: 4px solid #ffa000;
+                padding: 0.8em 1.2em; margin: 1em 0; }
+  .takeaways ul { margin: 0.3em 0; padding-left: 1.3em; }
+  .chart-container { position: relative; height: 380px; margin: 1.5em 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.88em; }
+  th, td { border: 1px solid #ddd; padding: 5px 9px; text-align: right; }
+  th { background: #f5f5f5; }
+  td:first-child, td:nth-child(4), td:last-child { text-align: left; }
+  code { background: #f5f5f5; padding: 1px 4px; border-radius: 3px; font-size: 0.9em; }
+  footer { font-size: 0.85em; color: #666; margin-top: 2em; padding-top: 1em;
+            border-top: 1px solid #ddd; }
+  .legend-fp32 { color: #1f77b4; font-weight: bold; }
+  .legend-bf16 { color: #d62728; font-weight: bold; }
+</style>
+</head><body>
+
+<h1>MI300A — scaling DDP <span class="legend-fp32">fp32</span> vs <span class="legend-bf16">bf16</span></h1>
+<p>Bench reproductibles sur Adastra, partition MI300A (4 APUs/node).
+fp32 = HPE_adastra branch (pre-bf16 switch), bf16 = dev_hpe branch (dev's choice da20e9f).
+Source CSV: <code>results.csv</code>, séparée par colonne <code>precision</code>.</p>
+
+<div class="takeaways">
+<strong>3 takeaways :</strong>
+<ul>
+<li><strong>bf16 gagne à toutes les échelles testées</strong> : +25% mono (1n×4), <strong>+33% sur 2n×4</strong>, +26% sur 4n×4.</li>
+<li><strong>Hero number : 4n×4 b40 bf16 = 273.4 img/s</strong> (+26% vs fp32 217.6). ETA Phase 1 (10M images) = 10.2 h.</li>
+<li><strong>Sweet spot batch mono-node = b40</strong> en bf16. b48-b64 ouvrent (vs fp32 stuck/OOM) mais plateau ~74 img/s. b80 reste OOM même en bf16.</li>
+</ul>
+</div>
+
+<h2>1. Throughput scaling — fp32 vs bf16 (par batch)</h2>
+<div class="chart-container"><canvas id="throughput"></canvas></div>
+
+<h2>2. Scan batch mono-node 4-GPU bf16 (plateau ~74, peak b40)</h2>
+<div class="chart-container"><canvas id="batch"></canvas></div>
+
+<h2>3. ETA 10M images — ranking</h2>
+<div class="chart-container"><canvas id="eta"></canvas></div>
+
+<h2>Données brutes</h2>
+<table>
+<thead><tr>
+<th>Setup</th><th>BS_local</th><th>BS_global</th><th>precision</th><th>it/s</th>
+<th>image/s</th><th>ETA 10M (h)</th><th>ETA 10M (j)</th><th>JOB_ID</th><th>commentaire</th>
+</tr></thead><tbody>
+<tr style="background:#f3f7ff"><td>1n×1G</td><td>10</td><td>10</td><td><strong>fp32</strong></td><td>1.52</td><td>15.2</td><td>182.7</td><td>7.61</td><td><code>5075334</code></td><td style="font-size:0.85em">1 APU isole baseline b10 (reference scaling)</td></tr>
+<tr style="background:#f3f7ff"><td>1n×1G</td><td>40</td><td>40</td><td><strong>fp32</strong></td><td>0.59</td><td>23.6</td><td>117.7</td><td>4.90</td><td><code>5075376</code></td><td style="font-size:0.85em">1 APU isole baseline b40 (+55% s/s/GPU vs b10)</td></tr>
+<tr style="background:#f3f7ff"><td>1n×2G</td><td>10</td><td>20</td><td><strong>fp32</strong></td><td>1.30</td><td>26.0</td><td>106.8</td><td>4.45</td><td><code>5075416</code></td><td style="font-size:0.85em">2 APUs mi300_numa b10</td></tr>
+<tr style="background:#f3f7ff"><td>1n×2G</td><td>40</td><td>80</td><td><strong>fp32</strong></td><td>0.50</td><td>40.0</td><td>69.4</td><td>2.89</td><td><code>5075441</code></td><td style="font-size:0.85em">2 APUs mi300_numa b40</td></tr>
+<tr style="background:#f3f7ff"><td>1n×4G</td><td>10</td><td>40</td><td><strong>fp32</strong></td><td>1.26</td><td>50.4</td><td>55.1</td><td>2.30</td><td><code>5075501</code></td><td style="font-size:0.85em">4 APUs mi300_numa b10 (scaling b10 quasi-flat)</td></tr>
+<tr style="background:#f3f7ff"><td>1n×4G</td><td>40</td><td>160</td><td><strong>fp32</strong></td><td>0.40</td><td>64.0</td><td>43.4</td><td>1.81</td><td><code>5075686</code></td><td style="font-size:0.85em">4 APUs mi300_numa b40 (scaling b40 sature -15pt/doublement)</td></tr>
+<tr style="background:#f3f7ff"><td>2n×4G</td><td>40</td><td>320</td><td><strong>fp32</strong></td><td>0.34</td><td>108.8</td><td>25.5</td><td>1.06</td><td><code>5076377</code></td><td style="font-size:0.85em">2n x 4 APUs mi300_srun4 b40 (85% scaling vs lineaire, inter-node OK)</td></tr>
+<tr style="background:#f3f7ff"><td>4n×4G</td><td>40</td><td>640</td><td><strong>fp32</strong></td><td>0.34</td><td>217.6</td><td>12.8</td><td>0.53</td><td><code>5076666</code></td><td style="font-size:0.85em">4n x 4 APUs mi300_srun4 b40 (100% scaling vs 2n, plateau flat post 1er hop)</td></tr>
+<tr style="background:#fff3f3"><td>1n×4G</td><td>40</td><td>160</td><td><strong>bf16</strong></td><td>0.50</td><td>80.0</td><td>34.7</td><td>1.45</td><td><code>5078636</code></td><td style="font-size:0.85em">4 APUs mi300_srun4 b40 bf16 (+25% throughput vs fp32, loss instable step 100-200 puis re-descente step 250)</td></tr>
+<tr style="background:#fff3f3"><td>1n×4G</td><td>32</td><td>128</td><td><strong>bf16</strong></td><td>0.58</td><td>74.5</td><td>37.3</td><td>1.55</td><td><code>5079132</code></td><td style="font-size:0.85em">4 APUs mi300_srun4 b32 bf16 (5 mesures stables, plateau ~74 img/s, -7% vs b40 = sweet spot)</td></tr>
+<tr style="background:#fff3f3"><td>1n×4G</td><td>48</td><td>192</td><td><strong>bf16</strong></td><td>0.39</td><td>74.5</td><td>37.3</td><td>1.55</td><td><code>5078975</code></td><td style="font-size:0.85em">4 APUs mi300_srun4 b48 bf16 (vs fp32 STUCK = unlock, 1 warm step seulement, VRAM 65%, -7% vs b40)</td></tr>
+<tr style="background:#fff3f3"><td>1n×4G</td><td>64</td><td>256</td><td><strong>bf16</strong></td><td>0.29</td><td>73.7</td><td>37.7</td><td>1.57</td><td><code>5079019</code></td><td style="font-size:0.85em">4 APUs mi300_srun4 b64 bf16 (vs fp32 OOM = unlock, VRAM 80%, plateau ~74 img/s = saturation memory bandwidth)</td></tr>
+<tr style="background:#ffe6e6"><td>1n×4G</td><td>80</td><td>320</td><td><strong>bf16</strong></td><td>OOM</td><td>OOM</td><td>—</td><td>—</td><td><code>5079134</code></td><td style="font-size:0.85em">4 APUs mi300_srun4 b80 bf16 OOM (2 oom_kill tasks 1+3 a 8m22s, mema activations bf16 reste trop grosse, b80 PAS unlock par bf16)</td></tr>
+<tr style="background:#fff3f3"><td>2n×4G</td><td>40</td><td>320</td><td><strong>bf16</strong></td><td>0.45</td><td>144.2</td><td>19.3</td><td>0.80</td><td><code>5079200</code></td><td style="font-size:0.85em">2n x 4 APUs mi300_srun4 b40 bf16 (1 warm step seulement, +33% vs fp32 108.8, ETA 10M -24% = 19.3h)</td></tr>
+<tr style="background:#fff3f3"><td>4n×4G</td><td>40</td><td>640</td><td><strong>bf16</strong></td><td>0.43</td><td>273.4</td><td>10.2</td><td>0.42</td><td><code>5079392</code></td><td style="font-size:0.85em">4n x 4 APUs mi300_srun4 b40 bf16 (3 mesures stables 272-275, +26% vs fp32 217.6, ETA 10M -21% = 10.2h)</td></tr>
+</tbody></table>
+
+<footer>
+  Source : <code>results.csv</code> · Détails par run bf16 : <code>report_bf16.md</code> ·
+  Régénérer : <code>python3 gen_report.py</code>
+</footer>
+
+<script>
+const X_TICKS = [1, 2, 4, 8, 16];
+const COMMON_X = {
+  type: 'linear', title: { display: true, text: "Nombre total d'APUs MI300A" },
+  min: 0.5, max: 16.5,
+  ticks: { stepSize: 1, callback: v => X_TICKS.includes(v) ? v : '' }
+};
+const ETA_DAYS = ["0.42", "0.53", "0.80", "1.06", "1.45", "1.55", "1.55", "1.57", "1.81", "2.30", "2.89", "4.45", "4.90", "7.61"];
+const ETA_PREC = ["bf16", "fp32", "bf16", "fp32", "bf16", "bf16", "bf16", "bf16", "fp32", "fp32", "fp32", "fp32", "fp32", "fp32"];
+
+new Chart(document.getElementById('throughput'), {
+  type: 'line',
+  data: {"datasets": [{"label": "b40 fp32", "data": [{"x": 1, "y": 23.6}, {"x": 2, "y": 40.0}, {"x": 4, "y": 64.0}, {"x": 8, "y": 108.8}, {"x": 16, "y": 217.6}], "borderColor": "#1f77b4", "backgroundColor": "#1f77b4", "tension": 0, "borderWidth": 2.5, "pointRadius": 7, "pointStyle": "circle"}, {"label": "b40 bf16", "data": [{"x": 4, "y": 80.0}, {"x": 8, "y": 144.2}, {"x": 16, "y": 273.4}], "borderColor": "#d62728", "backgroundColor": "#d62728", "tension": 0, "borderWidth": 2.5, "pointRadius": 8, "pointStyle": "rectRot"}, {"label": "b10 fp32", "data": [{"x": 1, "y": 15.2}, {"x": 2, "y": 26.0}, {"x": 4, "y": 50.4}], "borderColor": "#2ca02c", "backgroundColor": "#2ca02c", "tension": 0, "borderWidth": 1.5, "pointRadius": 5, "pointStyle": "triangle"}]},
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: { x: COMMON_X,
+              y: { title: { display: true, text: 'images / seconde' }, beginAtZero: true } },
+    plugins: { legend: { position: 'top' } }
+  }
+});
+
+new Chart(document.getElementById('batch'), {
+  type: 'bar',
+  data: {"labels": ["32", "40", "48", "64", "80 (OOM)"], "datasets": [{"label": "img/s (bf16, 1n \u00d7 4 APUs)", "data": [74.5, 80.0, 74.5, 73.7, 0], "backgroundColor": ["#ff9896", "#d62728", "#ff9896", "#ff9896", "#666"], "borderColor": "#000", "borderWidth": 1}]},
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: { x: { title: { display: true, text: 'local_batch_size' } },
+              y: { title: { display: true, text: 'images / seconde' }, beginAtZero: true } },
+    plugins: { legend: { position: 'top' } }
+  }
+});
+
+new Chart(document.getElementById('eta'), {
+  type: 'bar',
+  data: {"labels": ["4n\u00d74G b40 bf16", "4n\u00d74G b40 fp32", "2n\u00d74G b40 bf16", "2n\u00d74G b40 fp32", "1n\u00d74G b40 bf16", "1n\u00d74G b32 bf16", "1n\u00d74G b48 bf16", "1n\u00d74G b64 bf16", "1n\u00d74G b40 fp32", "1n\u00d74G b10 fp32", "1n\u00d72G b40 fp32", "1n\u00d72G b10 fp32", "1n\u00d71G b40 fp32", "1n\u00d71G b10 fp32"], "datasets": [{"label": "ETA 10M (heures)", "data": [10.2, 12.8, 19.3, 25.5, 34.7, 37.3, 37.3, 37.7, 43.4, 55.1, 69.4, 106.8, 117.7, 182.7], "backgroundColor": ["#d62728", "#1f77b4", "#d62728", "#1f77b4", "#d62728", "#d62728", "#d62728", "#d62728", "#1f77b4", "#1f77b4", "#1f77b4", "#1f77b4", "#1f77b4", "#1f77b4"], "borderColor": "#000", "borderWidth": 1}]},
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    scales: { x: { title: { display: true, text: 'heures' }, beginAtZero: true },
+              y: { title: { display: true, text: 'Setup (par ETA croissant)' } } },
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: {
+        label: c => `${c.parsed.x.toFixed(1)}h (${ETA_DAYS[c.dataIndex]}j) - ${ETA_PREC[c.dataIndex]}`
+      } }
+    }
+  }
+});
+</script>
+</body></html>

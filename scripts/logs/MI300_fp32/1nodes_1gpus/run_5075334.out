@@ -1,0 +1,47 @@
+Info: See Adastra AI module documentation at:
+https://dci.dci-gitlab.cines.fr/webextranet/software_stack/AI/index.html (or
+type module load venv) 
+Job started at Thu, 18 Jun 2026 15:33:25 +0200
+BIND_STRATEGY=mi300_numa  wrapper=/lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/scripts/bind_mi300.sh  config=/lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/configs/phase1.yaml  output=/lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/checkpoints/mi300_mi300_numa_run
+[bind_mi300] rank=0  cpu_set=0-23  OMP_NUM_THREADS=24  allowed=ffffffffffffffffffffffffffffffffffffffffffffffff
+15:33:46 INFO [__main__] Config     : /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/configs/phase1.yaml
+15:33:46 INFO [__main__] Output dir : /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/checkpoints/mi300_mi300_numa_run
+15:33:46 INFO [__main__] Effective : local_batch_size=10  num_workers=8  prefetch_factor=2  grad_ckpt=True  world_size=1
+15:33:51 INFO [nifti_dino_axial.data.dataset] Loaded slice index from /lus/work/CT3/cad17796/SHARED/merlin_extracted/slice_index.json: 10,604,577 slices
+15:33:51 INFO [__main__] Dataset: 10,604,577 valid axial slices
+15:33:51 INFO [dinov3] using base=100.0 for rope new
+15:33:51 INFO [dinov3] using min_period=None for rope new
+15:33:51 INFO [dinov3] using max_period=None for rope new
+15:33:51 INFO [dinov3] using normalize_coords=separate for rope new
+15:33:51 INFO [dinov3] using shift_coords=None for rope new
+15:33:51 INFO [dinov3] using rescale_coords=None for rope new
+15:33:51 INFO [dinov3] using jitter_coords=None for rope new
+15:33:51 INFO [dinov3] using dtype=bf16 for rope new
+15:33:51 INFO [dinov3] using mlp layer as FFN
+15:33:52 INFO [__main__] Pretrained weights: /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+15:33:53 INFO [__main__] Loaded pretrained weights from /lus/home/CRAY/hpe/jpourroy/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial/models_pretrained/flexiCT/2D_final_model.pth
+15:33:53 INFO [nifti_dino_axial.training.trainer] [rank 0] TensorBoard not available (pip install tensorboard to enable)
+/lus/home/softs/gaia-external/IA/venv_AI/versions/venv_AI_p311_torch-v2.11.0_rocm7.2.0_20260505/lib64/python3.11/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+15:33:54 INFO [dinov3] using base=100.0 for rope new
+15:33:54 INFO [dinov3] using min_period=None for rope new
+15:33:54 INFO [dinov3] using max_period=None for rope new
+15:33:54 INFO [dinov3] using normalize_coords=separate for rope new
+15:33:54 INFO [dinov3] using shift_coords=None for rope new
+15:33:54 INFO [dinov3] using rescale_coords=None for rope new
+15:33:54 INFO [dinov3] using jitter_coords=None for rope new
+15:33:54 INFO [dinov3] using dtype=bf16 for rope new
+15:33:54 INFO [dinov3] using mlp layer as FFN
+15:33:56 INFO [nifti_dino_axial.training.trainer] [rank 0] Flexi patch sizes: [8, 16]  (base=8)
+15:35:02 INFO [nifti_dino_axial.training.trainer] step=     50/200000  loss=22.3187  dino=11.2625  ibot=11.0428  koleo=0.1333  gram=0.0000  ps=8  lr=3.92e-06  ema=0.99400  it/s=0.79  eta=70h39m
+15:35:34 INFO [nifti_dino_axial.training.trainer] step=    100/200000  loss=22.1120  dino=11.2363  ibot=10.8736  koleo=0.0209  gram=0.0000  ps=8  lr=7.92e-06  ema=0.99400  it/s=1.55  eta=35h49m
+15:36:06 INFO [nifti_dino_axial.training.trainer] step=    150/200000  loss=21.9598  dino=11.1832  ibot=10.7712  koleo=0.0542  gram=0.0000  ps=16  lr=1.19e-05  ema=0.99400  it/s=1.57  eta=35h22m
+15:36:39 INFO [nifti_dino_axial.training.trainer] step=    200/200000  loss=21.7853  dino=11.1306  ibot=10.6553  koleo=-0.0053  gram=0.0000  ps=16  lr=1.59e-05  ema=0.99400  it/s=1.48  eta=37h24m
+15:37:13 INFO [nifti_dino_axial.training.trainer] step=    250/200000  loss=21.6562  dino=11.0523  ibot=10.6056  koleo=-0.0175  gram=0.0000  ps=16  lr=1.99e-05  ema=0.99400  it/s=1.48  eta=37h30m
+15:37:46 INFO [nifti_dino_axial.training.trainer] step=    300/200000  loss=21.2264  dino=10.8743  ibot=10.3595  koleo=-0.0750  gram=0.0000  ps=16  lr=2.39e-05  ema=0.99400  it/s=1.52  eta=36h23m
+15:38:21 INFO [nifti_dino_axial.training.trainer] step=    350/200000  loss=21.0116  dino=10.8509  ibot=10.1697  koleo=-0.0903  gram=0.0000  ps=16  lr=2.79e-05  ema=0.99400  it/s=1.42  eta=38h56m
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** STEP 5075334.0 ON a1019 CANCELLED AT 2026-06-18T15:38:28 ***
+slurmstepd: error: *** JOB 5075334 ON a1019 CANCELLED AT 2026-06-18T15:38:28 ***
+W0618 15:38:28.493000 2043554 torch/distributed/elastic/agent/server/api.py:739] Received 15 death signal, shutting down workers
+W0618 15:38:28.494000 2043554 torch/distributed/elastic/multiprocessing/api.py:1012] Sending process 2043706 closing signal SIGTERM

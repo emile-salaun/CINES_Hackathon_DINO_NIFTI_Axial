@@ -9,7 +9,7 @@
 # -----------------------------------------------------------------
 
 export SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export DIR="/lus/scratch/BCINES/dci/salaun/hackathon-juin/gh/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial"
+export DIR="${DIR:-/lus/scratch/BCINES/dci/salaun/hackathon-juin/gh/CINES_Hackathon_DINO_NIFTI_Axial/nifti_dino_axial}"
 
 # -----------------------------------------------------------------
 # Args (optionnels)
@@ -28,6 +28,15 @@ if [[ "$CONSTRAINT" != "MI250" && "$CONSTRAINT" != "MI300" ]]; then
 fi
 
 export GPUS_PER_NODE  # lu par cluster.sh via --export=ALL
+export CONSTRAINT     # lu par run.sh (case BIND_STRATEGY)
+export BIND_STRATEGY  # opt-in : 'mi300_srun4' active le pattern HPE multi-node
+
+NTASKS_PER_NODE=1
+case "${BIND_STRATEGY:-}" in
+    mi300_srun4)
+        NTASKS_PER_NODE="${GPUS_PER_NODE}"
+        ;;
+esac
 
 export LOGS_DIR="$SCRIPT_DIR/logs/${CONSTRAINT}/${NNODES}nodes_${GPUS_PER_NODE}gpus"
 mkdir -p "$LOGS_DIR"
@@ -54,11 +63,12 @@ echo ""
 # -----------------------------------------------------------------
 
 JOB_ID=$(sbatch --parsable \
-    --account=dci \
+    --account="${SBATCH_ACCOUNT:-dci}" \
+    ${SBATCH_RESERVATION:+--reservation=$SBATCH_RESERVATION} \
     --job-name=nifti_dino \
     --nodes="$NNODES" \
     --gpus-per-node="$GPUS_PER_NODE" \
-    --ntasks-per-node=1 \
+    --ntasks-per-node="$NTASKS_PER_NODE" \
     --cpus-per-task="$CPUS_PER_TASK" \
     --time=10:00:00 \
     --exclusive \
